@@ -16,8 +16,10 @@ class Voter:
         self.OPTIONS_KEY = 'options'
         self.WRITEIN_KEY = 'writein'
         self.PROPOSITIONS_KEY = 'propositions'
+        self.PUBLISH_CMD = 'publish'
+        self.STREAM_NAME = 'root'
         self.loadBallotTemplate()
-        # self.runBlockchain()
+        self.runBlockchain()
 
     def loadBallotTemplate(self):
         with open(self.TEMPLATE_LOCATION, 'r') as fd:
@@ -32,9 +34,17 @@ class Voter:
         popen = subprocess.Popen(args)
         popen.wait()
 
-    def processBallot(self, ballot):
+    def processBallot(self, ballot, ticket):
         ballotJson = json.dumps(ballot)
+        ballotHex = ballotJson.encode('utf-8').hex()
+        print(ballotHex)
         # TODO: load into blockchain!
+        args = (self.PUBLISH_CMD, self.STREAM_NAME, ticket, ballotHex)
+        popen = subprocess.Popen(args)
+        popen.wait()
+
+    def getID(self):
+        return 'faketicket'
 
     def createBallotAuto(self):
         ballotCopy = {}
@@ -52,8 +62,8 @@ class Voter:
             
     def run(self):
         ballot = self.createBallotAuto()
-        print(ballot)
-        self.processBallot(ballot)
+        ticket = self.getID()
+        self.processBallot(ballot, ticket)
 
 
 if __name__ == '__main__':
