@@ -9,7 +9,7 @@ TIMEOUT = 600
 
 
 # Returns a tuple of (hexdump, QR code filepath)
-def generateID(privateKey, prefix):
+def generateID(privateKey, prefix, useQR=False):
     # Message is timestamp and its hash
     timestamp = datetime.datetime.utcnow()
     message = timestamp.strftime(TIMESTAMP_FORMAT)
@@ -19,8 +19,11 @@ def generateID(privateKey, prefix):
     signer = PKCS1_PSS.new(privateKey)
     signature = signer.sign(mHash)
     # Create a hex value message and transform into QR code
-    import qrcode
     idString = message.encode('utf-8').hex() + DELIMITER + signature.hex()
+    if not useQR:
+        return (idString, '')
+    # Transform into QR code
+    import qrcode
     img = qrcode.make(idString)
     filepath = '{}/{}-{}.jpg'.format(prefix, message, idString[-16:])
     img.save(filepath)
