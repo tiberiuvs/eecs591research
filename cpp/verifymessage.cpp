@@ -32,9 +32,9 @@ bool verifyMessage(const std::string& message, const std::string& signature,
 	publicKey.Load(bytes);
     // Verifiy
     std::vector<char> sigBytes = hexToBytes(signature);
-    CryptoPP::SecByteBlock sigBlock((const CryptoPP::byte*)&sigBytes[0], sigBytes.size());
+    CryptoPP::SecByteBlock sigBlock((byte*)&sigBytes[0], sigBytes.size());
     CryptoPP::RSASS< CryptoPP::PSS,  CryptoPP::SHA1>::Verifier verifier(publicKey);
-    bool result = verifier.VerifyMessage((const CryptoPP::byte*)message.c_str(),
+    bool result = verifier.VerifyMessage((byte*)message.c_str(),
         message.length(), sigBlock, sigBlock.size());
     return result;
 }

@@ -1,5 +1,5 @@
 sign: signmessage.cpp
-	g++ -o signmessage signmessage.cpp -lcryptopp
+	g++ -std=c++11 -o signmessage signmessage.cpp -lcryptopp
 
 verify: verifymessage.cpp
-	g++ -o verifymessage verifymessage.cpp -lcryptopp
+	g++ -std=c++11 -o verifymessage verifymessage.cpp -lcryptopp

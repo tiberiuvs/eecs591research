@@ -33,7 +33,7 @@ std::string signMessage(const std::string& message, const std::string& privateKe
     size_t length = signer.MaxSignatureLength();
     CryptoPP::SecByteBlock signature(length);
     CryptoPP::AutoSeededRandomPool rng;
-    length = signer.SignMessage(rng, (const CryptoPP::byte*) message.c_str(),
+    length = signer.SignMessage(rng, (byte*) message.c_str(),
                                 message.length(), signature);
     signature.resize(length);
     // Return a hexdump of the signature
