@@ -1,59 +1,39 @@
-from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_PSS
-from Crypto.Hash import SHA
 import datetime
+import subprocess
 
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 DELIMITER = '-'
 TIMEOUT = 600
+CPP_DIR = 'cpp'
 
 
-# Returns a tuple of (hexdump, QR code filepath)
-def generateID(privateKey, prefix, useQR=False):
-    # Message is timestamp and its hash
+# Returns a hexdump string of the message and its signature
+def generateID(privateKeyFile):
     timestamp = datetime.datetime.utcnow()
     message = timestamp.strftime(TIMESTAMP_FORMAT)
-    mHash = SHA.new(message.encode('utf-8'))
-    # Create an RSA signature with the private key
-    privateKey = RSA.importKey(open(privateKey, 'r').read())
-    signer = PKCS1_PSS.new(privateKey)
-    signature = signer.sign(mHash)
-    # Create a hex value message and transform into QR code
-    idString = message.encode('utf-8').hex() + DELIMITER + signature.hex()
-    if not useQR:
-        return (idString, '')
-    # Transform into QR code
-    import qrcode
-    img = qrcode.make(idString)
-    filepath = '{}/{}-{}.jpg'.format(prefix, message, idString[-16:])
-    img.save(filepath)
-    return (idString, filepath)
+    callArgs = ('{}/signmessage'.format(CPP_DIR), message, privateKeyFile)
+    proc = subprocess.Popen(callArgs, stdout=subprocess.PIPE)
+    results = proc.communicate()
+    signature = results[0][:-1].decode('utf-8')
+    idString = message.encode('utf-8').hex() + DELIMITER + signature
+    return idString
 
 
 # Returns True for valid and False for invalid
-def validateIDFromHex(publicKey, message):
+def validateIDFromHex(message, publicKeyFile):
     # Read in the given message and split up the message
     messageList = message.split(DELIMITER)
     timestamp = bytes.fromhex(messageList[0]).decode('utf-8')
-    signature = bytes.fromhex(messageList[1])
-    mHash = SHA.new(timestamp.encode('utf-8'))
-    # Verify the RSA signature
-    publicKey = RSA.importKey(open(publicKey, 'r').read())
-    verifier = PKCS1_PSS.new(publicKey)
-    if not verifier.verify(mHash, signature):
-        return False
+    signature = messageList[1]
     # Verify the message is not stale
     messageTime = datetime.datetime.strptime(timestamp, TIMESTAMP_FORMAT)
     currentTime = datetime.datetime.utcnow()
     difference = (currentTime - messageTime).seconds
     if difference > TIMEOUT:
         return False
-    return True
-
-
-# Returns True for valid and False for invalid
-def validateIDFromQR(publicKey, filepath):
-    from qrtools.qrtools import QR
-    qr = QR()
-    qr.decode(filepath)
-    return validateIDFromHex(publicKey, qr.data)
+    # Verify the RSA signature
+    callArgs = ('{}/verifymessage'.format(CPP_DIR), timestamp, signature, publicKeyFile)
+    proc = subprocess.Popen(callArgs, stdout=subprocess.PIPE)
+    results = proc.communicate()
+    retVal = (results[0][:-1].decode('utf-8') == '1')
+    return retVal

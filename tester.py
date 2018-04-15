@@ -16,16 +16,14 @@ parser.add_argument('-c','--chain', help='name of the blockchain',
 parser.add_argument('-s','--stream', help='name of the blockchain stream',
                     default='voting_stream')
 parser.add_argument('-p','--publickey', help='path to the public key',
-                    default='data/sample_public_key.pem')
+                    default='data/publickey.der')
 parser.add_argument('-r','--privatekey', help='path to the private key',
-                    default='data/sample_private_key.pem')
-parser.add_argument('-q','--qrcodes', help='path to the QR codes directory',
-                    default='qrcodes')
+                    default='data/privatekey.p8')
 args = parser.parse_args()
 
 vInstance = voter.Voter(args.template, args.multichain, args.datadir, args.chain, args.stream, args.publickey)
 
 for i in range(100):
-    hexdump, _ = uid.generateID(args.privatekey, args.qrcodes)
+    newID = uid.generateID(args.privatekey)
     ballot = vInstance.autoFillBallot()
-    vInstance.processBallot(ballot, hexdump)
+    vInstance.processBallot(ballot, newID)

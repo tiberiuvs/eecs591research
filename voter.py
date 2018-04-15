@@ -7,13 +7,13 @@ import uniqueid as uid
 
 
 class Voter:
-    def __init__(self, template, multichainCLI, datadir, chain, stream, publicKey):
+    def __init__(self, template, multichainCLI, datadir, chain, stream, publicKeyFile):
         self.template = template
         self.multichainCLI = multichainCLI
         self.datadir = datadir
         self.chain = chain
         self.stream = stream
-        self.publicKey = publicKey
+        self.publicKeyFile = publicKeyFile
         with open(self.template, 'r') as fd:
             ballotTemplate = json.load(fd)
             self.ballotElections = ballotTemplate['elections']
@@ -23,7 +23,8 @@ class Voter:
         return (self.ballotElections, self.ballotProps)
 
     def processBallot(self, ballot, ticket):
-        if not uid.validateIDFromHex(self.publicKey, ticket):
+        if not uid.validateIDFromHex(self.publicKeyFile, ticket):
+            print('Could not validate ballot/ticket')
             return False
         ballotJson = json.dumps(ballot)
         ballotHex = ballotJson.encode('utf-8').hex()
