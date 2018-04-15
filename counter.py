@@ -3,7 +3,7 @@ import argparse
 import json
 import subprocess
 
-KEY_FILE = 'counter_keys_list.json'
+KEY_FILE = 'all_keys_list.json'
 
 parser = argparse.ArgumentParser(description='Run the counting application for the voting system')
 parser.add_argument('-m','--multichain', help='path to the multichain CLI',
@@ -17,9 +17,10 @@ parser.add_argument('-s','--stream', help='name of the blockchain stream',
 commandArgs = parser.parse_args()
 
 listKeyArgs = (commandArgs.multichain, commandArgs.chain, '-datadir={}'.format(commandArgs.datadir),
-               'liststreamitems', commandArgs.stream, ' > {}'.format(KEY_FILE))
-listKeyProc = subprocess.Popen(listKeyArgs)
-listKeyProc.wait()
+               'liststreamkeys', commandArgs.stream)
+with open(KEY_FILE, 'w') as fd:
+    listKeyProc = subprocess.Popen(listKeyArgs, stdout=fd)
+    listKeyProc.wait()
 
 allKeys = []
 with open(KEY_FILE, 'r') as fd:
@@ -34,7 +35,7 @@ allVotes = {}
 for key in allKeys:
     listItemArgs = (commandArgs.multichain, commandArgs.chain, '-datadir={}'.format(commandArgs.datadir),
                     'liststreamkeyitems', commandArgs.stream, key)
-    listItemProc = subprocess.Popen(listItemArgs)
+    listItemProc = subprocess.Popen(listItemArgs, stdout=subprocess.PIPE)
     results = listItemProc.communicate()
     itemDict = json.loads(results[0])
     dataHex = itemDict[0]['data']
