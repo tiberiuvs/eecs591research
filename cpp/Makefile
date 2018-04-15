@@ -1,2 +1,5 @@
-tester: tester.cpp uniqueid.h voter.h
-	gcc -o tester tester.cpp
+sign: signmessage.cpp
+	g++ -o signmessage signmessage.cpp -lcryptopp
+
+verify: verifymessage.cpp
+	g++ -o verifymessage verifymessage.cpp -lcryptopp
