@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import time
 import uniqueid as uid
 import voter
 
@@ -24,6 +25,12 @@ args = parser.parse_args()
 vInstance = voter.Voter(args.template, args.multichain, args.datadir, args.chain, args.stream, args.publickey)
 
 for i in range(100):
+    print('Iteration {}'.format(i))
+    print('Generating ID...')
     newID = uid.generateID(args.privatekey)
+    print('Generated. Filling ballot...')
     ballot = vInstance.autoFillBallot()
+    print('Filled. Adding ballot to blockchain...')
     vInstance.processBallot(ballot, newID)
+    print('Added to blockchain.')
+    time.sleep(0.75)

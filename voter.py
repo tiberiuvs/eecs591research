@@ -23,13 +23,13 @@ class Voter:
         return (self.ballotElections, self.ballotProps)
 
     def processBallot(self, ballot, ticket):
-        if not uid.validateIDFromHex(self.publicKeyFile, ticket):
+        if not uid.validateIDFromHex(ticket, self.publicKeyFile):
             print('Could not validate ballot/ticket')
             return False
         ballotJson = json.dumps(ballot)
         ballotHex = ballotJson.encode('utf-8').hex()
         args = (self.multichainCLI, self.chain, '-datadir={}'.format(self.datadir),
-                'publish', self.stream, ticket, ballotHex)
+                'publish', self.stream, ticket[-256:], ballotHex)
         popen = subprocess.Popen(args)
         popen.wait()
         # TODO: schedule so at most one per minute is processed
