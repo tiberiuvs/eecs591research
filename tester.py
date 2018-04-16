@@ -23,7 +23,7 @@ parser.add_argument('-r','--privatekey', help='path to the private key',
                     default='data/privatekey.p8')
 parser.add_argument('-v', '--votes', type=int, help='number of votes to cast',
                     default=100)
-parser.add_argument('-c', '--counts', help='path to output voting count file',
+parser.add_argument('-o', '--outcounts', help='path to output voting count file',
                     default='local_counts.json')
 args = parser.parse_args()
 
