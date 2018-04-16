@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import json
 import time
 import uniqueid as uid
 import voter
@@ -20,17 +21,32 @@ parser.add_argument('-p','--publickey', help='path to the public key',
                     default='data/publickey.der')
 parser.add_argument('-r','--privatekey', help='path to the private key',
                     default='data/privatekey.p8')
+parser.add_argument('-v', '--votes', type=int, help='number of votes to cast',
+                    default=100)
+parser.add_argument('-c', '--counts', help='path to output voting count file',
+                    default='local_counts.json')
 args = parser.parse_args()
 
 vInstance = voter.Voter(args.template, args.multichain, args.datadir, args.chain, args.stream, args.publickey)
+voteCount = {}
+startTime = time.time()
 
-for i in range(100):
+for i in range(args.votes):
     print('Iteration {}'.format(i))
-    print('Generating ID...')
+    # Create a random ballot and add it to the blockchain
     newID = uid.generateID(args.privatekey)
-    print('Generated. Filling ballot...')
     ballot = vInstance.autoFillBallot()
-    print('Filled. Adding ballot to blockchain...')
     vInstance.processBallot(ballot, newID)
-    print('Added to blockchain.')
-    time.sleep(0.75)
+    # Save the results of the ballot locally
+    for position, vote in ballot.items():
+        if position not in voteCount:
+            voteCount[position] = {}
+        if vote not in voteCount[position]:
+            voteCount[position][vote] = 0
+        voteCount[position][vote] += 1
+
+duration = time.time() - startTime
+print('{} seconds elapsed'.format(duration))
+with open(args.counts, 'w') as fd:
+    json.dump(voteCount, fd)
+print('Wrote local vote counts to {}'.format(args.counts))

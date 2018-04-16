@@ -4,3 +4,4 @@ qrcodes/*
 __pycache__
 cpp/signmessage
 cpp/verifymessage
+.vscode/settings.json
