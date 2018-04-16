@@ -47,6 +47,6 @@ for i in range(args.votes):
 
 duration = time.time() - startTime
 print('{} seconds elapsed'.format(duration))
-with open(args.counts, 'w') as fd:
+with open(args.outcounts, 'w') as fd:
     json.dump(voteCount, fd)
 print('Wrote local vote counts to {}'.format(args.counts))
