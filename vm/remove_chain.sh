@@ -1,6 +1,7 @@
 #!/bin/bash
 
-MULTICHAIN_DIR="/home/eecs591/multichain-1.0.4/"
+DATA_DIR="/home/eecs591/multichain-1.0.4/server_data"
 
 killall multichaind
-rm -r $MULTICHAIN_DIR"server_data"
+sleep 2s
+rm -r $DATA_DIR
