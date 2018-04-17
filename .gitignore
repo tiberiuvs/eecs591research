@@ -1,5 +1,5 @@
 .DS_Store
 .DS_Store*
-qrcodes/*
 __pycache__
-vscode/settings.json
+.vscode/*
+
