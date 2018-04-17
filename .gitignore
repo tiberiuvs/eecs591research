@@ -2,6 +2,4 @@
 .DS_Store*
 qrcodes/*
 __pycache__
-cpp/signmessage
-cpp/verifymessage
-.vscode/settings.json
+vscode/settings.json
