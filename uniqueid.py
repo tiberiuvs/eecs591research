@@ -4,14 +4,14 @@ import subprocess
 TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
 DELIMITER = '-'
 TIMEOUT = 600
-CPP_DIR = 'cpp'
-
+SIGN_EXEC = 'cpp/signmessage'
+VERIFY_EXEC = 'cpp/verifymessage'
 
 # Returns a hexdump string of the message and its signature
 def generateID(privateKeyFile):
     timestamp = datetime.datetime.utcnow()
     message = timestamp.strftime(TIMESTAMP_FORMAT)
-    callArgs = ('{}/signmessage'.format(CPP_DIR), message, privateKeyFile)
+    callArgs = (SIGN_EXEC, message, privateKeyFile)
     proc = subprocess.Popen(callArgs, stdout=subprocess.PIPE)
     results = proc.communicate()
     signature = results[0][:-1].decode('utf-8')
@@ -32,7 +32,7 @@ def validateIDFromHex(message, publicKeyFile):
     if difference > TIMEOUT:
         return False
     # Verify the RSA signature
-    callArgs = ('{}/verifymessage'.format(CPP_DIR), timestamp, signature, publicKeyFile)
+    callArgs = (VERIFY_EXEC, timestamp, signature, publicKeyFile)
     proc = subprocess.Popen(callArgs, stdout=subprocess.PIPE)
     results = proc.communicate()
     retVal = (results[0][:-1].decode('utf-8') == '1')
