@@ -8,4 +8,4 @@ sudo ifdown enp0s8; sudo ifdown enp0s3; sudo ifup enp0s3
 sudo apt-get update > /dev/null
 sudo ifdown enp0s3; sudo ifdown enp0s8; sudo ifup enp0s8
 
-$MULTCHAIN_D vote_chain -datadir=$DATA_DIR -daemon
+$MULTICHAIN_D vote_chain -datadir=$DATA_DIR -daemon
