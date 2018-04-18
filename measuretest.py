@@ -21,7 +21,7 @@ parser.add_argument('-s','--stream', help='name of the blockchain stream',
 parser.add_argument('-l','--limit', type=int, help='limit of when to stop measuring',
                     default=100)
 parser.add_argument('-i','--interval', type=int, help='interval of how often to take measurement',
-                    default='../multichain-1.0.4/server_data')
+                    default=60)
 commandArgs = parser.parse_args()
 
 
