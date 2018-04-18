@@ -32,6 +32,7 @@ listKeyArgs = (commandArgs.multichain, commandArgs.chain, '-datadir={}'.format(c
                'liststreamkeys', commandArgs.stream)
 
 while lastCount < commandArgs.limit - 1:
+    time.sleep(commandArgs.interval)
     currentTime = datetime.datetime.utcnow()
     with open(KEY_FILE, 'w') as fd:
         listKeyProc = subprocess.Popen(listKeyArgs, stdout=fd)
@@ -42,7 +43,6 @@ while lastCount < commandArgs.limit - 1:
     os.remove(KEY_FILE)
     formattedTime = currentTime.strftime("%H:%M:%S")
     countList.append((formattedTime, lastCount))
-    time.sleep(commandArgs.interval)
 
 with open(OUTPUT_FILE, 'w') as fd:
     for entry in countList:
