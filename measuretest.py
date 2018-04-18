@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import datetime
 import json
 import os
 import subprocess
@@ -31,7 +32,7 @@ listKeyArgs = (commandArgs.multichain, commandArgs.chain, '-datadir={}'.format(c
                'liststreamkeys', commandArgs.stream)
 
 while lastCount < commandArgs.limit - 1:
-    currentTime = time.time()
+    currentTime = datetime.datetime.utcnow()
     with open(KEY_FILE, 'w') as fd:
         listKeyProc = subprocess.Popen(listKeyArgs, stdout=fd)
         listKeyProc.wait()
@@ -39,7 +40,7 @@ while lastCount < commandArgs.limit - 1:
         keysDict = json.load(fd)
     lastCount = len(keysDict)
     os.remove(KEY_FILE)
-    formattedTime = time.strftime("%H:%M:%S", currentTime)
+    formattedTime = currentTime.strftime("%H:%M:%S")
     countList.append((formattedTime, lastCount))
     time.sleep(commandArgs.interval)
 
