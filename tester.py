@@ -25,6 +25,8 @@ parser.add_argument('-v', '--votes', type=int, help='number of votes to cast',
                     default=100)
 parser.add_argument('-o', '--outcounts', help='path to output voting count file',
                     default='local_counts.json')
+parser.add_argument('-i', '--interval', type=int, help='interval of how often to write a vote',
+                    default=1)
 args = parser.parse_args()
 
 vInstance = voter.Voter(args.template, args.multichain, args.datadir, args.chain, args.stream, args.publickey)
@@ -44,6 +46,7 @@ for i in range(args.votes):
         if vote not in voteCount[position]:
             voteCount[position][vote] = 0
         voteCount[position][vote] += 1
+    time.sleep(args.interval)
 
 duration = time.time() - startTime
 print('{} seconds elapsed'.format(duration))
