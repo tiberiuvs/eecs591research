@@ -34,13 +34,15 @@ listKeyArgs = (commandArgs.multichain, commandArgs.chain, '-datadir={}'.format(c
 while lastCount < commandArgs.limit - 1:
     time.sleep(commandArgs.interval)
     currentTime = datetime.datetime.utcnow()
-    with open(KEY_FILE, 'w') as fd:
+    filepath = '{}-{}'.format(lastCount, KEY_FILE)
+    with open(filepath, 'w') as fd:
         listKeyProc = subprocess.Popen(listKeyArgs, stdout=fd)
         listKeyProc.wait()
-    with open(KEY_FILE, 'r') as fd:
+    with open(filepath, 'r') as fd:
         keysDict = json.load(fd)
     lastCount = len(keysDict)
-    os.remove(KEY_FILE)
+    print('Counted {} keys'.format(lastCount))
+    os.remove(filepath)
     formattedTime = currentTime.strftime("%H:%M:%S")
     countList.append((formattedTime, lastCount))
 
