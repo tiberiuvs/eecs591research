@@ -46,15 +46,58 @@ class Voter:
             ballotCopy[position] = random.choice(options)
         return ballotCopy
 
+    def get_choice_elect(self, elect):
+        print("Choices for " + elect['position'])
+        choices = ""
+        choices_list = []
+        for choice in elect['options']:
+            cur_choice = list(choice.values())[0] # Hacky I know
+            choices_list.append(cur_choice)
+            choices += cur_choice + ", "
+        if elect['writein']:
+            choices += "or Write In"
+        else:
+            choices = choices[:-2]
+        print(choices)
+        while True:
+            selection = input("Please choose one: ")
+            if selection in choices or elect['writein']:
+                return selection
+
+    def get_choice_prop(self, prop):
+        print(prop['proposition'])
+        print(prop['description'])
+        choices = ['Yes', 'No']
+        while True:
+            selection = input("Yes or No: ")
+            if selection in choices:
+                return selection
+
+    def cli_ballot(self):
+        print("\nPlease fill out your choices for the elections and propositions")
+        while True:
+            this_ballot = {}
+            print("Elections")
+            for elect in self.ballotElections:
+                selection = self.get_choice_elect(elect)
+                this_ballot[elect['position']] = selection
+            print("Propositions")
+            for prop in self.ballotProps:
+                selection = self.get_choice_prop(prop)
+                this_ballot[prop['proposition']] = selection
+            print("Is this your correct ballot?")
+            print(this_ballot)
+            selection = input("Yes/No: ")
+            if selection == "Yes":
+                return this_ballot
 
 def runVoterInterface(args):
-    vInstance = Voter(args.template, args.multichainCLI, args.datadir, args.chain,
-                      args.stream, args.publicKey)
+    vInstance = Voter(args.template, args.multichain, args.datadir, args.chain,
+                      args.stream, args.publickey)
     # Run the interface indefinitely
     while True:
-        # TODO: interactive inputs
-        pass
-
+        ballot = vInstance.cli_ballot()
+        vInstance.processBallot(ballot, uid.generateID(args.privatekey))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run the interactive voting application')
