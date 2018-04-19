@@ -92,12 +92,14 @@ class Voter:
                 return this_ballot
 
 def runVoterInterface(args):
-    vInstance = Voter(args.template, args.multichain, args.datadir, args.chain,
+    vInstance = Voter(args.template, args.multichainCLI, args.datadir, args.chain,
                       args.stream, args.publickey)
     # Run the interface indefinitely
     while True:
         ballot = vInstance.cli_ballot()
-        vInstance.processBallot(ballot, uid.generateID(args.privatekey))
+        print('Enter your unique voting ID')
+        givenID = input()
+        vInstance.processBallot(ballot, givenID)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run the interactive voting application')
