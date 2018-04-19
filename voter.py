@@ -23,7 +23,11 @@ class Voter:
         return (self.ballotElections, self.ballotProps)
 
     def processBallot(self, ballot, ticket):
-        if not uid.validateIDFromHex(ticket, self.publicKeyFile):
+        try:
+            if not uid.validateIDFromHex(ticket, self.publicKeyFile):
+                print('Could not validate ballot/ticket')
+                return False
+        except:
             print('Could not validate ballot/ticket')
             return False
         ballotJson = json.dumps(ballot)
