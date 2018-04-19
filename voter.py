@@ -104,6 +104,7 @@ def runVoterInterface(args):
         print('Enter your unique voting ID')
         givenID = input()
         vInstance.processBallot(ballot, givenID)
+        print('Ballot submitted!')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run the interactive voting application')
