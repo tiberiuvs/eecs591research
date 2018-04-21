@@ -1,27 +1,30 @@
 # EECS 591 Research Project
 
-This research project proposes voting in polling stations using machines that use a blockchain (via MultiChain???) to safely store immutable ballot records and allow for quick parallel counting.
+This research project proposes voting in polling stations using machines that use a blockchain (via MultiChain) to safely store immutable ballot records and allow for quick parallel counting.
 
-There are four sections: the program that generates a unique one-time ID (a ballot, essentially) for a registered voter at the polling station; the program that takes in votes for the actual ballots then enters the record on the blockchain; the program that reads the blockchain and counts all votes; the program that is used for testing all parts of the project together.
+There are six parts: the program that generates a unique one-time ID (a ticket for voting, essentially) for a registered voter at the polling station; the library that cryptographically generated the ID; the program that takes in votes for the actual ballots then enters the record on the blockchain; the program that reads the blockchain and counts all votes; the program that is used for testing all parts of the project together; the program for measuring the test and counting the time votes observed on the chain at each interval.
 
-The code is written for Python 3. Some things may need extra effort based on the OS, such as the libraries for QR codes.
+The code is written for Python 3.6.
 
 ## ID Library
-`uniqueid.py` is a library that can be imported by the other programs to support creating unique IDs and validating unique IDs. It can create a unique ID using a timestamp and private key, and exports a QR code file, then returns the hexdump and filepath. It can also verify a unique ID is valid by the hexdump or QR code filepath.
+`uniqueid.py` is a library that can be imported by the other programs to support creating unique IDs and validating unique IDs. It can create a unique ID using a timestamp and private key then returns the hexdump. It can also verify a unique ID is valid by the hexdump. Uses the C++ execultables that must be compiled in the `cpp` directory.
 
 ## ID Generator Program
-`generator.py` is a simple standalone program that uses the ID libary to generate and print the contents of a new unique ID and its QR code.
+`generator.py` is a very simple standalone program that uses the ID libary to generate and print the contents of a new unique ID upon hitting enter.
 
 ## Voter Program
 `voter.py` is the program that does the grunt work. At initialization, it reads in the paper ballot to know what and how to ask the user polling questions then later construct the ballot record data structure that is used on the blockchain.
 
-It supports being run as a standalone program and also being imported by the tester, therefore the core functionality should be implemented in a Class that stores ballot data and is able to run functions to get/enter ballots.
+It supports being run as a standalone program and also being imported by the tester, therefore the core functionality is implemented in a Class that stores ballot data and is able to run functions to get/enter ballots.
 
 ## Counter Program
 `counter.py` is the program that iterates over every block in the blockchain, ballot record in the block, and aggregates votes for each item voted on. It outputs one single file that has a count for every item voted on by the entire state, with regional prefixes intact.
 
 ## Tester Program
-`tester.py` is a work in progress, but will be used to run some tests of automatically generating IDs, voting randomly, and submitting those votes to the blockchain.
+`tester.py` is a program that is used to test for correctness and throughput in the system. It repeatedly generates a new ID, fills in a sample ballot randomly, then adds that ballot to the blockchain at a certain interval for a certain number of iterations.
+
+## Measurement program
+`measuretest.py` is the program that is to be run on a separate machine that also has access to the blockchain. It queries the blockchain to see the number of accepted votes, then sleeps for a given interval of time.
 
 ## Other necessary data
 
@@ -88,5 +91,10 @@ This format is output by the counter at the very end. The template is as follows
 }
 ```
 
-### MultiChain parameters
-We'll need some sort of file to store MultiChain parameters, I take it.
+### Multichain parameters
+After experimentation, the agreed on parameters for the blockchain data stream are
+```
+-target-block-time=2
+-mining-turnover=0.0
+-mining-diversity=1.0
+```

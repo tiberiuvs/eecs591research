@@ -7,6 +7,7 @@ TIMEOUT = 600
 SIGN_EXEC = 'cpp/signmessage'
 VERIFY_EXEC = 'cpp/verifymessage'
 
+
 # Returns a hexdump string of the message and its signature
 def generateID(privateKeyFile):
     timestamp = datetime.datetime.utcnow()

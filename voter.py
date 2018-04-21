@@ -36,8 +36,8 @@ class Voter:
                 'publish', self.stream, ticket[-256:], ballotHex)
         popen = subprocess.Popen(args)
         popen.wait()
-        # TODO: schedule so at most one per minute is processed
         return True
+        # TODO: schedule so at most one per minute is processed
 
     def autoFillBallot(self):
         ballotCopy = {}
@@ -101,7 +101,7 @@ def runVoterInterface(args):
     # Run the interface indefinitely
     while True:
         ballot = vInstance.cli_ballot()
-        print('Enter your unique voting ID')
+        print('Enter your unique voting ID:')
         givenID = input()
         vInstance.processBallot(ballot, givenID)
         print('Ballot submitted!')

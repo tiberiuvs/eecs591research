@@ -3,6 +3,10 @@ import uniqueid as uid
 
 PRIVATE_KEY_LOC = 'data/privatekey.p8'
 
-hexdump = uid.generateID(PRIVATE_KEY_LOC)
-print(hexdump)
 
+while True:
+    print('Enter anything to generate a new key or Q to quit')
+    entry = input()
+    if entry.lower() == 'q':
+        break
+    print(uid.generateID(PRIVATE_KEY_LOC))
