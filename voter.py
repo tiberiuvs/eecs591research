@@ -9,16 +9,18 @@ import queue
 import time
 
 class Voter:
-    # def __init__(self, template, multichainCLI, datadir, chain, stream, publicKeyFile, intervalWait):
-    def __init__(self, template, intervalWait):
+    def __init__(self, template, multichainCLI, datadir, chain, stream, publicKeyFile, intervalWait):
         self.template = template
-        # self.multichainCLI = multichainCLI
-        # self.datadir = datadir
-        # self.chain = chain
-        # self.stream = stream
-        # self.publicKeyFile = publicKeyFile
-        self.interval_wait = intervalWait
-        self.process_queue = queue.Queue()
+        self.multichainCLI = multichainCLI
+        self.datadir = datadir
+        self.chain = chain
+        self.stream = stream
+        self.publicKeyFile = publicKeyFile
+        self.intervalWait = intervalWait
+        self.processQueue = queue.Queue()
+        self.processThread = threading.Thread(target=self.handleProcessing)
+        self.processThread.start()
+        self.lastBallotTime = time.time()
         with open(self.template, 'r') as fd:
             ballotTemplate = json.load(fd)
             self.ballotElections = ballotTemplate['elections']
@@ -35,14 +37,28 @@ class Voter:
         except:
             print('Could not validate ballot/ticket')
             return False
+        if time.time() - self.lastBallotTime > self.intervalWait:
+            self.submitBallot(ballot, ticket)
+        else:
+            self.processQueue.put(ballot, ticket)
+        return True
+
+    def handleProcessing(self):
+        while True:
+            time.sleep(self.intervalWait)
+            if self.processQueue.empty():
+                continue
+            self.lastBallotTime = time.time()
+            toProcess = self.processQueue.get()
+            self.submitBallot(toProcess[0], toProcess[1])
+
+    def submitBallot(self, ballot, ticket):
         ballotJson = json.dumps(ballot)
         ballotHex = ballotJson.encode('utf-8').hex()
         args = (self.multichainCLI, self.chain, '-datadir={}'.format(self.datadir),
                 'publish', self.stream, ticket[-256:], ballotHex)
         popen = subprocess.Popen(args)
         popen.wait()
-        return True
-        # TODO: schedule so at most one per minute is processed
 
     def autoFillBallot(self):
         ballotCopy = {}
@@ -100,23 +116,16 @@ class Voter:
             if selection == "Yes":
                 return this_ballot
 
-    def handle_processing(self):
-        while True:
-            time.sleep(self.interval_wait)
-            to_process = self.process_queue.get()
-            self.processBallot(to_process[0], to_process[1])
-
 
 def runVoterInterface(args):
-    vInstance = Voter(args.template, args.interval)
-    process_thread = threading.Thread(target=vInstance.handle_processing)
-    process_thread.start()
+    vInstance = Voter(args.template, args.multichain, args.datadir, args.chain, args.stream, args.publickey, args.interval)
     # Run the interface indefinitely
     while True:
         ballot = vInstance.cli_ballot()
         print('Enter your unique voting ID:')
         givenID = input()
-        vInstance.process_queue.put([ballot, givenID])
+        vInstance.processBallot(ballot, givenID)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run the interactive voting application')
