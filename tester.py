@@ -48,6 +48,9 @@ for i in range(args.votes):
         voteCount[position][vote] += 1
     time.sleep(args.interval)
 
+while not vInstance.isFinished():
+    time.sleep(args.interval)
+
 duration = time.time() - startTime
 print('{} seconds elapsed'.format(duration))
 with open(args.outcounts, 'w') as fd:
