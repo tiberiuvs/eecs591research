@@ -20,16 +20,13 @@ class Voter:
         self.intervalWait = intervalWait
         self.processQueue = queue.Queue()
         self.processThread = threading.Thread(target=self.handleProcessing)
+        self.processBallot.daemon = True
         self.processThread.start()
         self.lastBallotTime = time.time()
-        self.killAll = False
         with open(self.template, 'r') as fd:
             ballotTemplate = json.load(fd)
             self.ballotElections = ballotTemplate['elections']
             self.ballotProps = ballotTemplate['propositions']
-
-    def terminate(self):
-        self.killAll = True
 
     def getEmptyBallot(self):
         return (self.ballotElections, self.ballotProps)
@@ -49,7 +46,7 @@ class Voter:
         return True
 
     def handleProcessing(self):
-        while not self.killAll:
+        while True:
             time.sleep(self.intervalWait)
             if self.processQueue.empty():
                 continue
