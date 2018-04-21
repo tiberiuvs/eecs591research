@@ -4,16 +4,21 @@ import json
 import random
 import subprocess
 import uniqueid as uid
-
+import threading
+import queue
+import time
 
 class Voter:
-    def __init__(self, template, multichainCLI, datadir, chain, stream, publicKeyFile):
+    # def __init__(self, template, multichainCLI, datadir, chain, stream, publicKeyFile, intervalWait):
+    def __init__(self, template, intervalWait):
         self.template = template
-        self.multichainCLI = multichainCLI
-        self.datadir = datadir
-        self.chain = chain
-        self.stream = stream
-        self.publicKeyFile = publicKeyFile
+        # self.multichainCLI = multichainCLI
+        # self.datadir = datadir
+        # self.chain = chain
+        # self.stream = stream
+        # self.publicKeyFile = publicKeyFile
+        self.interval_wait = intervalWait
+        self.process_queue = queue.Queue()
         with open(self.template, 'r') as fd:
             ballotTemplate = json.load(fd)
             self.ballotElections = ballotTemplate['elections']
@@ -95,15 +100,22 @@ class Voter:
             if selection == "Yes":
                 return this_ballot
 
+    def handle_processing(self):
+        while True:
+            time.sleep(self.interval_wait)
+            to_process = self.process_queue.get()
+            self.processBallot(to_process[0], to_process[1])
+
+
 def runVoterInterface(args):
-    vInstance = Voter(args.template, args.multichainCLI, args.datadir, args.chain,
-                      args.stream, args.publickey)
+    vInstance = Voter(args.template, args.interval)
+    process_thread = threading.Thread(target=vInstance.handle_processing)
+    process_thread.start()
     # Run the interface indefinitely
     while True:
         ballot = vInstance.cli_ballot()
-        print('Enter your unique voting ID')
-        givenID = input()
-        vInstance.processBallot(ballot, givenID)
+        givenID = input("Enter your unique voting ID: ")
+        vInstance.process_queue.put([ballot, givenID])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run the interactive voting application')
@@ -113,4 +125,6 @@ if __name__ == '__main__':
     parser.add_argument('chain', help='name of the blockchain')
     parser.add_argument('stream', help='name of the blockchain stream')
     parser.add_argument('publickey', help='path to the public key')
+    parser.add_argument('interval', type=float, help='interval of how often to write a vote',
+                    default=3.0)
     runVoterInterface(parser.parse_args())
