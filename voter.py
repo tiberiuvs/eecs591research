@@ -6,6 +6,7 @@ import subprocess
 import uniqueid as uid
 import threading
 import queue
+import sys
 import time
 
 class Voter:
@@ -21,10 +22,14 @@ class Voter:
         self.processThread = threading.Thread(target=self.handleProcessing)
         self.processThread.start()
         self.lastBallotTime = time.time()
+        self.killAll = False
         with open(self.template, 'r') as fd:
             ballotTemplate = json.load(fd)
             self.ballotElections = ballotTemplate['elections']
             self.ballotProps = ballotTemplate['propositions']
+
+    def terminate(self):
+        self.killAll = True
 
     def getEmptyBallot(self):
         return (self.ballotElections, self.ballotProps)
@@ -40,11 +45,11 @@ class Voter:
         if time.time() - self.lastBallotTime > self.intervalWait:
             self.submitBallot(ballot, ticket)
         else:
-            self.processQueue.put(ballot, ticket)
+            self.processQueue.put([ballot, ticket])
         return True
 
     def handleProcessing(self):
-        while True:
+        while not self.killAll:
             time.sleep(self.intervalWait)
             if self.processQueue.empty():
                 continue
