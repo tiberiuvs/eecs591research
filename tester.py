@@ -29,7 +29,7 @@ parser.add_argument('-i', '--interval', type=float, help='interval of how often 
                     default=1.0)
 args = parser.parse_args()
 
-vInstance = voter.Voter(args.template, args.multichain, args.datadir, args.chain, args.stream, args.publickey)
+vInstance = voter.Voter(args.template, args.multichain, args.datadir, args.chain, args.stream, args.publickey, args.interval)
 voteCount = {}
 startTime = time.time()
 
